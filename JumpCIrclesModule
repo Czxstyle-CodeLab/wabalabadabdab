@@ -10,7 +10,7 @@ local module = {}
 local circles = {}
 local charConn = nil
 local heartbeatConn = nil
-local jumpCircleColor = {R = 138, G = 43, B = 226}
+local jumpCircleColor = {R = 255, G = 255, B = 225}
 
 local function spawnCircle(position)
     local part = Instance.new("Part")
