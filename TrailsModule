@@ -1,0 +1,79 @@
+-- ╔══════════════════════════════════════════════════════╗
+-- ║          TRAILS MODULE — Белый стиль                 ║
+-- ╚══════════════════════════════════════════════════════╝
+
+local Players = game:GetService("Players")
+local lp = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+local module = {}
+local trail = nil
+local charConn = nil
+
+local trailColor = {
+    R1 = 180, G1 = 0, B1 = 255,
+    R2 = 138, G2 = 43, B2 = 226,
+    R3 = 80, G3 = 0, B3 = 180
+}
+
+function module.Enable()
+    local function setupTrail(char)
+        if not char then return end
+        local hrp = char:WaitForChild("HumanoidRootPart", 3)
+        if not hrp then return end
+        if trail then trail:Destroy() trail = nil end
+
+        local a0 = Instance.new("Attachment", hrp)
+        a0.Position = Vector3.new(0, 1, 0)
+        a0.Name = "WexTrailA0"
+
+        local a1 = Instance.new("Attachment", hrp)
+        a1.Position = Vector3.new(0, -1, 0)
+        a1.Name = "WexTrailA1"
+
+        trail = Instance.new("Trail")
+        trail.Attachment0 = a0
+        trail.Attachment1 = a1
+        trail.Lifetime = 0.4
+        trail.MinLength = 0
+        trail.FaceCamera = true
+        trail.Color = ColorSequence.new{
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(trailColor.R1, trailColor.G1, trailColor.B1)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(trailColor.R2, trailColor.G2, trailColor.B2)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(trailColor.R3, trailColor.G3, trailColor.B3))
+        }
+        trail.Transparency = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(1, 1)
+        }
+        trail.WidthScale = NumberSequence.new{
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(1, 0)
+        }
+        trail.Parent = hrp
+    end
+
+    if lp.Character then setupTrail(lp.Character) end
+    charConn = lp.CharacterAdded:Connect(function(char)
+        task.wait(0.5)
+        setupTrail(char)
+    end)
+end
+
+function module.Disable()
+    if charConn then charConn:Disconnect() charConn = nil end
+    if trail then trail:Destroy() trail = nil end
+    -- Удаляем старые attachments
+    if lp.Character then
+        local hrp = lp.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            for _, v in ipairs(hrp:GetChildren()) do
+                if v.Name == "WexTrailA0" or v.Name == "WexTrailA1" then
+                    v:Destroy()
+                end
+            end
+        end
+    end
+end
+
+return module
