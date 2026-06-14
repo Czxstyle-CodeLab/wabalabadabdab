@@ -11,9 +11,9 @@ local trail = nil
 local charConn = nil
 
 local trailColor = {
-    R1 = 180, G1 = 0, B1 = 255,
-    R2 = 138, G2 = 43, B2 = 226,
-    R3 = 80, G3 = 0, B3 = 180
+    R1 = 255, G1 = 255, B1 = 255,
+    R2 = 250, G2 = 250, B2 = 250,
+    R3 = 200, G3 = 200, B3 = 200
 }
 
 function module.Enable()
