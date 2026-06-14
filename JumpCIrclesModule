@@ -1,0 +1,91 @@
+-- ╔══════════════════════════════════════════════════════╗
+-- ║          JUMP CIRCLES MODULE — Белый стиль           ║
+-- ╚══════════════════════════════════════════════════════╝
+
+local Players = game:GetService("Players")
+local lp = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+local module = {}
+local circles = {}
+local charConn = nil
+local heartbeatConn = nil
+local jumpCircleColor = {R = 138, G = 43, B = 226}
+
+local function spawnCircle(position)
+    local part = Instance.new("Part")
+    part.Anchored = true
+    part.CanCollide = false
+    part.CastShadow = false
+    part.Size = Vector3.new(0.15, 3, 3)
+    part.CFrame = CFrame.new(position) * CFrame.Angles(0, 0, math.rad(90))
+    part.Material = Enum.Material.Neon
+    part.Color = Color3.fromRGB(jumpCircleColor.R, jumpCircleColor.G, jumpCircleColor.B)
+    part.Transparency = 0
+    part.Parent = workspace
+    part.Name = "WexJumpCircle"
+
+    local mesh = Instance.new("SpecialMesh")
+    mesh.MeshType = Enum.MeshType.Cylinder
+    mesh.Scale = Vector3.new(1, 1, 1)
+    mesh.Parent = part
+
+    table.insert(circles, {part = part, mesh = mesh, start = tick(), dur = 0.5})
+end
+
+function module.Enable()
+    local wasAir = false
+
+    local function setup(char)
+        if not char then return end
+        local hum = char:WaitForChild("Humanoid", 3)
+        local hrp = char:WaitForChild("HumanoidRootPart", 3)
+        if not hum or not hrp then return end
+
+        if heartbeatConn then heartbeatConn:Disconnect() end
+        heartbeatConn = RunService.Heartbeat:Connect(function()
+            local air = hum.FloorMaterial == Enum.Material.Air
+            if wasAir and not air then
+                spawnCircle(hrp.Position - Vector3.new(0, 2.8, 0))
+            end
+            wasAir = air
+
+            -- Обновляем круги
+            local now = tick()
+            for i = #circles, 1, -1 do
+                local c = circles[i]
+                local prog = (now - c.start) / c.dur
+                if prog >= 1 then
+                    c.part:Destroy()
+                    table.remove(circles, i)
+                else
+                    c.mesh.Scale = Vector3.new(1, 1 + prog * 2, 1 + prog * 2)
+                    c.part.Transparency = prog * 0.95
+                    c.part.Color = Color3.fromRGB(jumpCircleColor.R, jumpCircleColor.G, jumpCircleColor.B)
+                end
+            end
+        end)
+    end
+
+    if lp.Character then setup(lp.Character) end
+    charConn = lp.CharacterAdded:Connect(function(char)
+        task.wait(0.5)
+        setup(char)
+    end)
+end
+
+function module.Disable()
+    if charConn then charConn:Disconnect() charConn = nil end
+    if heartbeatConn then heartbeatConn:Disconnect() heartbeatConn = nil end
+    -- Удаляем все круги
+    for _, c in ipairs(circles) do
+        if c.part then c.part:Destroy() end
+    end
+    circles = {}
+    -- Удаляем оставшиеся в workspace
+    for _, v in ipairs(workspace:GetChildren()) do
+        if v.Name == "WexJumpCircle" then v:Destroy() end
+    end
+end
+
+return module
