@@ -8,7 +8,7 @@ local RunService = game:GetService("RunService")
 
 -- Загружаем модули
 local TrailsModule = loadstring(game:HttpGet("URL_TO_TRAILS_MODULE"))()
-local ChinaHatModule = loadstring(game:HttpGet("URL_TO_CHINAHAT_MODULE"))()
+local ChinaHatModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/Czxstyle-CodeLab/wabalabadabdab/refs/heads/main/ChinaHatModule"))()
 local JumpCirclesModule = loadstring(game:HttpGet("URL_TO_JUMPCIRCLES_MODULE"))()
 
 -- Создаем GUI
